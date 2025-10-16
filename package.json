@@ -1,0 +1,82 @@
+{
+  "name": "file-templates-tool",
+  "displayName": "File Templates Tool",
+  "description": "Manage and apply code templates/snippets across languages from folder context menu.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onCommand:fileTemplates.createFromTemplate",
+    "onCommand:fileTemplates.manageTemplates",
+    "onCommand:fileTemplates.openTemplatesFolder",
+    "onCommand:fileTemplates.openManagerPanel"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "fileTemplates.createFromTemplate",
+        "title": "从模板创建文件"
+      },
+      {
+        "command": "fileTemplates.manageTemplates",
+        "title": "管理文件模板"
+      },
+      {
+        "command": "fileTemplates.openTemplatesFolder",
+        "title": "打开模板目录"
+      },
+      {
+        "command": "fileTemplates.openManagerPanel",
+        "title": "打开模板管理面板"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "fileTemplates.jsonEditor",
+        "displayName": "模板JSON编辑器",
+        "selector": [
+          { "filenamePattern": "**/.file-templates/*.json" },
+          { "filenamePattern": "**/.file-templates/**/*.json" }
+        ],
+        "priority": "default"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "fileTemplates.createFromTemplate",
+          "group": "navigation@2",
+          "when": "resourceScheme == file"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "fileTemplates.manageTemplates",
+          "when": "true",
+          "group": ""
+        },
+        {
+          "command": "fileTemplates.openTemplatesFolder",
+          "when": "true",
+          "group": ""
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "echo \"No lint configured\"",
+    "test": "echo \"No tests\""
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0"
+  }
+}

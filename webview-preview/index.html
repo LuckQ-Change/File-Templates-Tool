@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>模板内容面板预览</title>
+    <style>
+      :root {
+        --bg: #1e1e1e; --fg: #e5e5e5; --muted: #9e9e9e;
+        --panel-bg: #252526; --panel-fg: #e5e5e5;
+        --input-bg: #2d2d2d; --input-fg: #e5e5e5;
+        --button-bg: #0e639c; --button-fg: #fff; --button-hover:#1177bb;
+        --border: #00000033; --toolbar-hover:#ffffff1a;
+      }
+      body { font-family: -apple-system, Segoe UI, system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--fg); }
+      .bar { display:flex; align-items:center; gap:8px; padding:8px; border-bottom:1px solid var(--border); background: var(--panel-bg); }
+      .bar .spacer { flex:1; }
+      .bar button { background: var(--button-bg); color: var(--button-fg); border:none; padding:6px 12px; border-radius:4px; cursor:pointer; }
+      .bar button:hover { background: var(--button-hover); }
+      .list { padding:12px; display:flex; flex-direction:column; gap:12px; }
+      .card { background: var(--panel-bg); color: var(--panel-fg); border:1px solid var(--border); border-radius:6px; }
+      .card-head { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid var(--border); }
+      .title { font-weight:600; }
+      .meta { font-size: 12px; color: var(--muted); padding:0 12px 8px; }
+      .content { padding:12px; }
+      pre { margin:0; white-space: pre-wrap; word-break: break-word; font-family: Consolas, monospace; font-size: 13px; }
+      .actions { display:flex; align-items:center; gap:6px; }
+      .icon { background: transparent; border:none; color: var(--panel-fg); cursor:pointer; padding:2px 4px; border-radius:4px; }
+      .icon:hover { background: var(--toolbar-hover); }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <button>Add Snippet</button>
+      <span class="spacer"></span>
+      <span style="opacity:.7;font-size:12px;">预览（跟随 VS Code 暗色风格）</span>
+    </div>
+    <div class="list">
+      <div class="card">
+        <div class="card-head">
+          <div class="title">define</div>
+          <div class="actions">
+            <button class="icon" title="编辑">✎</button>
+            <button class="icon" title="复制">⎘</button>
+            <button class="icon" title="删除">✖</button>
+          </div>
+        </div>
+        <div class="meta">.js</div>
+        <div class="content"><pre>define('module', [ 'dependency' ], function(dep, factory){
+  'use strict';
+  // ...
+});</pre></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="title">for</div>
+          <div class="actions">
+            <button class="icon" title="编辑">✎</button>
+            <button class="icon" title="复制">⎘</button>
+            <button class="icon" title="删除">✖</button>
+          </div>
+        </div>
+        <div class="meta">.js</div>
+        <div class="content"><pre>for (let i = 0; i &lt; n; i++) {
+  // ...
+}</pre></div>
+      </div>
+    </div>
+  </body>
+  </html>

@@ -8,8 +8,8 @@
 
 ### 新增
 
-- 增加 ESLint 基础配置（`eslint.config.js`），并启用可用的 `npm run lint`。
-- 增加扩展图标配置（`package.json` 的 `icon` 指向 `media/icon.png`）。
+- 增加 ESLint 基础配置，并启用可用的 `npm run lint`。
+- 增加扩展图标配置。
 
 ### 安全
 

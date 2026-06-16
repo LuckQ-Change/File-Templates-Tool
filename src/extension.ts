@@ -124,7 +124,7 @@ function readTemplates(filePath: string): TemplatesFile {
     const data = JSON.parse(raw) as TemplatesFile;
     if (!data.templates) data.templates = [];
     return data;
-  } catch (e) {
+  } catch {
     return { language: path.basename(filePath, '.json'), templates: [] };
   }
 }

@@ -92,13 +92,34 @@ export class TemplatesJsonEditorProvider implements vscode.CustomTextEditorProvi
     await vscode.workspace.applyEdit(edit);
   }
 
+  private getNonce(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let out = '';
+    for (let i = 0; i < 32; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
+    return out;
+  }
+
+  private escapeHtml(s: string): string {
+    return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' } as any)[ch] || ch);
+  }
+
   private getHtml(webview: vscode.Webview, document: vscode.TextDocument): string {
     const initial = document.getText();
+    const nonce = this.getNonce();
+    const safePath = this.escapeHtml(document.uri.fsPath);
+    const csp = [
+      `default-src 'none'`,
+      `img-src ${webview.cspSource} data:`,
+      `style-src ${webview.cspSource} 'unsafe-inline'`,
+      `script-src 'nonce-${nonce}'`
+    ].join('; ');
+
     return `<!DOCTYPE html>
     <html lang="zh-CN">
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta http-equiv="Content-Security-Policy" content="${csp}">
       <title>模板内容面板</title>
       <style>
         :root {
@@ -146,10 +167,10 @@ export class TemplatesJsonEditorProvider implements vscode.CustomTextEditorProvi
         <button id="saveAll">保存全部</button>
         <button id="addSnippet">Add Snippet</button>
         <span class="spacer"></span>
-        <span class="path">${document.uri.fsPath}</span>
+        <span class="path">${safePath}</span>
       </div>
       <div class="list" id="list"></div>
-      <script>
+      <script nonce="${nonce}">
         const vscode = acquireVsCodeApi();
         const state = { type: 'unknown', language: '', templates: [] };
         const $ = sel => document.querySelector(sel);
@@ -233,7 +254,7 @@ export class TemplatesJsonEditorProvider implements vscode.CustomTextEditorProvi
               render();
             });
             $name.addEventListener('input', () => t.name = $name.value);
-            $ext.addEventListener('input', () => t.extension = $ext.value.replace(/^\./,'') );
+            $ext.addEventListener('input', () => t.extension = $ext.value.replace(/^\\./,'') );
             root.appendChild(card);
           });
         }

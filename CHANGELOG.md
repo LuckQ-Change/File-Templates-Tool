@@ -1,0 +1,25 @@
+# 更新日志
+
+此文件记录本项目的所有重要变更。
+
+## [未发布]
+
+## [0.0.2] - 2026-06-16
+
+### 新增
+
+- 增加 ESLint 基础配置（`eslint.config.js`），并启用可用的 `npm run lint`。
+- 增加扩展图标配置（`package.json` 的 `icon` 指向 `media/icon.png`）。
+
+### 安全
+
+- Webview 增加 CSP + nonce，降低脚本注入风险。
+- Webview 消息处理增加 `filePath` 校验：仅允许操作 `.file-templates/**/*.json`。
+- 自定义 JSON 编辑器 Webview 中展示的文件路径进行了 HTML 转义。
+
+## [0.0.1] - 2025-05-15
+
+### 说明
+
+- 初始发布版本。
+

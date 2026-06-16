@@ -15,7 +15,12 @@ interface SnippetItem {
 }
 
 export class TemplateManagerPanel {
-  static async open(context: vscode.ExtensionContext) {
+  static async open(_context: vscode.ExtensionContext) {
+    const root = this.getTemplatesRoot();
+    if (!root) {
+      vscode.window.showErrorMessage('请先打开一个工作区');
+      return;
+    }
     const panel = vscode.window.createWebviewPanel(
       'fileTemplates.managerPanel',
       '模板总览管理面板',
@@ -23,7 +28,6 @@ export class TemplateManagerPanel {
       { enableScripts: true, retainContextWhenHidden: true }
     );
 
-    const root = this.getTemplatesRoot();
     panel.webview.html = this.getHtml(panel.webview);
 
     const postIndex = () => {
@@ -41,6 +45,11 @@ export class TemplateManagerPanel {
         case 'openFile':
           if (msg.filePath) {
             try {
+              const filePath = String(msg.filePath);
+              if (!this.isSafeTemplateJsonPath(root, filePath)) {
+                vscode.window.showErrorMessage('拒绝打开：路径不安全或不在 .file-templates 下');
+                break;
+              }
               const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(msg.filePath));
               await vscode.window.showTextDocument(doc, { preview: false });
             } catch {}
@@ -48,6 +57,11 @@ export class TemplateManagerPanel {
           break;
         case 'saveSnippet': {
           const it: SnippetItem = msg.item;
+          if (!it || !it.filePath) break;
+          if (!this.isSafeTemplateJsonPath(root, String(it.filePath))) {
+            vscode.window.showErrorMessage('保存失败：路径不安全或不在 .file-templates 下');
+            break;
+          }
           if (it.type === 'file') {
             const payload = { name: it.name, extension: it.extension.replace(/^\./,''), content: it.content };
             try { fs.writeFileSync(it.filePath, JSON.stringify(payload, null, 2), 'utf8'); } catch {}
@@ -65,6 +79,11 @@ export class TemplateManagerPanel {
           break; }
         case 'deleteSnippet': {
           const it: SnippetItem = msg.item;
+          if (!it || !it.filePath) break;
+          if (!this.isSafeTemplateJsonPath(root, String(it.filePath))) {
+            vscode.window.showErrorMessage('删除失败：路径不安全或不在 .file-templates 下');
+            break;
+          }
           if (it.type === 'file') {
             try { fs.unlinkSync(it.filePath); } catch {}
           } else {
@@ -81,6 +100,11 @@ export class TemplateManagerPanel {
           break; }
         case 'duplicateSnippet': {
           const it: SnippetItem = msg.item;
+          if (!it || !it.filePath) break;
+          if (!this.isSafeTemplateJsonPath(root, String(it.filePath))) {
+            vscode.window.showErrorMessage('复制失败：路径不安全或不在 .file-templates 下');
+            break;
+          }
           if (it.type === 'file') {
             try {
               const dir = path.dirname(it.filePath);
@@ -126,10 +150,11 @@ export class TemplateManagerPanel {
     });
   }
 
-  private static getTemplatesRoot(): string {
+  private static getTemplatesRoot(): string | undefined {
     const workspace = vscode.workspace.workspaceFolders?.[0];
-    const root = workspace ? path.join(workspace.uri.fsPath, '.file-templates') : '';
-    if (root && !fs.existsSync(root)) { try { fs.mkdirSync(root, { recursive: true }); } catch {} }
+    if (!workspace) return undefined;
+    const root = path.join(workspace.uri.fsPath, '.file-templates');
+    if (!fs.existsSync(root)) { try { fs.mkdirSync(root, { recursive: true }); } catch {} }
     return root;
   }
 
@@ -183,12 +208,42 @@ export class TemplateManagerPanel {
     return items;
   }
 
+  private static isSafeTemplateJsonPath(root: string, filePath: string): boolean {
+    if (!root || !filePath) return false;
+    try {
+      const rootResolved = path.resolve(root);
+      const fileResolved = path.resolve(filePath);
+      const rel = path.relative(rootResolved, fileResolved);
+      if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) return false;
+      if (!fileResolved.toLowerCase().endsWith('.json')) return false;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private static getNonce(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let out = '';
+    for (let i = 0; i < 32; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
+    return out;
+  }
+
   private static getHtml(webview: vscode.Webview) {
+    const nonce = this.getNonce();
+    const csp = [
+      `default-src 'none'`,
+      `img-src ${webview.cspSource} data:`,
+      `style-src ${webview.cspSource} 'unsafe-inline'`,
+      `script-src 'nonce-${nonce}'`
+    ].join('; ');
+
     return `<!DOCTYPE html>
     <html lang="zh-CN">
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta http-equiv="Content-Security-Policy" content="${csp}">
       <title>模板总览管理面板</title>
       <style>
         :root {
@@ -237,7 +292,7 @@ export class TemplateManagerPanel {
         <span class="badge">管理 .file-templates 下所有模板</span>
       </div>
       <div class="list" id="list"></div>
-      <script>
+      <script nonce="${nonce}">
         const vscode = acquireVsCodeApi();
         const state = { items: [] };
         const $ = sel => document.querySelector(sel);
@@ -300,7 +355,7 @@ export class TemplateManagerPanel {
               vscode.postMessage({ type: 'duplicateSnippet', item: t });
             });
             card.querySelector('[data-act="save"]').addEventListener('click', () => {
-              t.name = $name.value; t.extension = $ext.value.replace(/^\./,'');
+              t.name = $name.value; t.extension = $ext.value.replace(/^\\./,'');
               vscode.postMessage({ type: 'saveSnippet', item: t });
             });
             card.querySelector('[data-act="del"]').addEventListener('click', () => {
@@ -310,7 +365,7 @@ export class TemplateManagerPanel {
               vscode.postMessage({ type: 'openFile', filePath: t.filePath });
             });
             $name.addEventListener('input', () => t.name = $name.value);
-            $ext.addEventListener('input', () => t.extension = $ext.value.replace(/^\./,'') );
+            $ext.addEventListener('input', () => t.extension = $ext.value.replace(/^\\./,'') );
             root.appendChild(card);
           });
         }

@@ -2,9 +2,11 @@
   "name": "file-templates-tool",
   "displayName": "File Templates Tool",
   "description": "Manage and apply code templates/snippets across languages from folder context menu.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {"name": "WJQ"},
   "publisher": "WJQ",
+  "icon": "media/icon.png",
+  "keywords": ["template", "file template", "snippet", "scaffold", "code generator"],
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -72,13 +74,16 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "echo \"No lint configured\"",
+    "lint": "eslint .",
     "test": "echo \"No tests\""
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",
     "typescript": "^5.4.0",
-    "@types/node": "^20.11.0"
+    "@types/node": "^20.11.0",
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
+    "typescript-eslint": "^8.0.0"
   },
   "repository":{
     "type": "git",

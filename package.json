@@ -3,14 +3,24 @@
   "displayName": "File Templates Tool",
   "description": "Manage and apply code templates/snippets across languages from folder context menu.",
   "version": "0.0.2",
-  "author": {"name": "WJQ"},
+  "author": {
+    "name": "WJQ"
+  },
   "publisher": "WJQ",
   "icon": "media/icon.png",
-  "keywords": ["template", "file template", "snippet", "scaffold", "code generator"],
+  "keywords": [
+    "template",
+    "file template",
+    "snippet",
+    "scaffold",
+    "code generator"
+  ],
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "activationEvents": [
     "onCommand:fileTemplates.createFromTemplate",
     "onCommand:fileTemplates.manageTemplates",
@@ -42,8 +52,12 @@
         "viewType": "fileTemplates.jsonEditor",
         "displayName": "模板JSON编辑器",
         "selector": [
-          { "filenamePattern": "**/.file-templates/*.json" },
-          { "filenamePattern": "**/.file-templates/**/*.json" }
+          {
+            "filenamePattern": "**/.file-templates/*.json"
+          },
+          {
+            "filenamePattern": "**/.file-templates/**/*.json"
+          }
         ],
         "priority": "default"
       }
@@ -78,14 +92,15 @@
     "test": "echo \"No tests\""
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
-    "typescript": "^5.4.0",
-    "@types/node": "^20.11.0",
-    "eslint": "^9.0.0",
     "@eslint/js": "^9.0.0",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.2",
+    "eslint": "^9.0.0",
+    "typescript": "^5.4.0",
     "typescript-eslint": "^8.0.0"
   },
-  "repository":{
+  "repository": {
     "type": "git",
     "url": "https://github.com/Q1028/File-Templates-Tool.git"
   }
